@@ -11,7 +11,7 @@ from peft import LoraConfig, get_peft_model
 
 import dino.vision_transformer as vits
 import dino.utils as utils
-from dino.utils import BLRP, CrossAttentionBlock
+from dino.utils import MILE, CrossAttentionBlock
 from dino.vision_transformer import DINOHead
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -83,7 +83,7 @@ def init_model(args: Any, weight_path: Optional[str], num_classes: int, device: 
             tp, ap = trainable_parameters(model)
             logging.info(f"LoRA trainable params: {tp} || all params: {ap} || trainable%: {100 * tp / ap:.2f}")
     
-    elif args.view == "blrp_pre_head":
+    elif args.view == "multi-view":
         if peft:
             config = LoraConfig(
                 r=48, lora_alpha=16, target_modules=["qkv"], lora_dropout=0.1,
@@ -96,7 +96,7 @@ def init_model(args: Any, weight_path: Optional[str], num_classes: int, device: 
         embed_dim = model.embed_dim
         dual_latent_cross = CrossAttentionBlock(dim=embed_dim, proj_dim=2*embed_dim, explicit_residual=args.explicit_residual) if args.dual_condition else None
         
-        model = BLRP(
+        model = MILE(
             backbone=utils.MultiCropWrapper(model, None),
             latent_cross=CrossAttentionBlock(
                 dim=embed_dim, proj_dim=2*embed_dim, explicit_residual=args.explicit_residual,
@@ -152,7 +152,7 @@ def process_embeddings(args: Any, model: nn.Module, dataset: Any, output_type: s
             cls_tokens = [model(image) for image in images]
             for cls in cls_tokens:
                 results.append((cls, labels))
-        elif args.view.startswith("blrp"):
+        elif args.view.startswith("multi-view"):
             cls_tokens = model(images, output_type=output_type)
             cls_tokens = cls_tokens.to("cpu")
             if args.cross_wi_registers:

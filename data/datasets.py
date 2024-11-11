@@ -64,7 +64,7 @@ class MVDataset(Dataset):
         return len(self.class_to_samples)
 
 
-class RandomBLRPSampler:
+class MILESampler:
     def __init__(
         self,
         samples_per_class: int,

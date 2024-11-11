@@ -630,9 +630,9 @@ class MultiCropWrapper(nn.Module):
         return output
     
 
-class BLRP(nn.Module):
+class MILE(nn.Module):
     def __init__(self, backbone, latent_cross, dual_latent_cross, num_global_crops, num_local_crops, final_projection=None, gate_tanh = False, dual_gate_tanh = False, bi_directional = False, union_latent_keys = False, backward_dual_latent_cross = False, cross_wi_patch_e = False, ignore_cls_in_lxs = False, cross_wi_registers = False,  arch = None, dinov2_force_cls_in_lxs = False):
-        super(BLRP, self).__init__()
+        super(MILE, self).__init__()
         self.backbone = backbone # vit
         self.latent_cross = latent_cross # agg 
         self.final_projection = final_projection # dino head

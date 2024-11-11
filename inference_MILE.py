@@ -12,7 +12,7 @@ import torch.nn as nn
 from torchvision import transforms as pth_transforms
 import faiss
 
-from data.datasets import MVDataset, RandomBLRPSampler
+from data.datasets import MVDataset, MILESampler
 from dino.dino_args import get_dino_args
 from dino.utils import fix_random_seeds
 from model.model import init_model, process_embeddings
@@ -60,7 +60,7 @@ def load_datasets(args: argparse.Namespace, transform: pth_transforms.Compose) -
     datasets_map = {}
     for mode in glob.glob(os.path.join(args.data_path, "*")):
         key = os.path.basename(mode)
-        random_k_samples = RandomBLRPSampler(
+        random_k_samples = MILESampler(
             args.samples_per_class,
             transform,
             no_pad=args.no_pad,
@@ -116,7 +116,7 @@ def compute_recalls(args: argparse.Namespace, X_train: np.ndarray, Y_train: np.n
     return recalls, m_recall
 
 def get_cls_types(args: argparse.Namespace) -> List[Tuple[int, int, str]]:
-    if args.view == "multi-view" or args.view.startswith("blrp"):
+    if args.view == "multi-view":
         return [(None, None, "rank_mv_max")]
     else:
         cls_types = [
