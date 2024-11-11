@@ -23,7 +23,35 @@ pip install -r requirements.txt
 > We plan on releasing the training code. 
 
 ## Data Preparation
-> We plan on releasing the data preparation code. 
+
+### Amazon Berkeley Objects (ABO) Dataset
+
+```eval
+cd ./data_processing/abo
+bash download_raw_data.sh
+python abo_preprocess.py
+
+```
+
+This will generate the data splits for the original "CVPR22 Multi-View Retrieval experiments"
+The default output location is:
+```eval
+./data_preprocesing/abo/abo_raw_data/inference_by_class
+```
+
+### iNaturalist
+
+```
+cd ./data_processing/inat
+bash download_raw_data.sh
+python inat_preprocess.py
+
+```
+
+The default output location is:
+```eval
+./data_preprocesing/inat/inat_raw_data/inference_by_class
+```
 
 ## Inference 
 

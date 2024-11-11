@@ -57,8 +57,8 @@ def main(data_path: str, target_path: str) -> None:
 
 if __name__ == '__main__':
     parser = ArgumentParser(description="Process iNaturalist dataset files")
-    parser.add_argument("--data_path", type=str, required=True, help="Path to the data directory")
-    parser.add_argument("--target_path", type=str, required=True, help="Path to the target directory")
+    parser.add_argument("--data_path", type=str, default="./inat_raw_data/inference_by_class/images", help="Path to the data directory")
+    parser.add_argument("--target_path", type=str, default="./inat_raw_data/inference_by_class", help="Path to the target directory")
 
     args = parser.parse_args()
 
