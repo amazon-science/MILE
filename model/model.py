@@ -66,7 +66,7 @@ def trainable_parameters(model: nn.Module) -> Tuple[int, int]:
     return trainable_params, all_params
 
 def init_model(args: Any, weight_path: Optional[str], num_classes: int, device: str, peft: bool = False) -> nn.Module:
-    model = get_backbone(args.arch, args.model_name, args.patch_size, num_classes)
+    model = get_backbone(args.arch, args.base_model_name, args.patch_size, num_classes)
     
     if args.view == "single":
         if weight_path:
@@ -136,13 +136,14 @@ def init_model(args: Any, weight_path: Optional[str], num_classes: int, device: 
     return model
 
 def process_embeddings(args: Any, model: nn.Module, dataset: Any, output_type: str, device: str = "cuda") -> Dict[str, torch.Tensor]:
+    # batch size set to 1 since 1 batch contains the entire image-set to be processed by MILE
     loader = DataLoader(
-        dataset, shuffle=False, batch_size=args.batch_size_per_gpu,
+        dataset, shuffle=False, batch_size=1,
         num_workers=1, pin_memory=True, drop_last=False
     )
     results: List[Tuple[torch.Tensor, torch.Tensor]] = []
     
-    for batch in tqdm.tqdm(loader, desc="Processing embeddings"):
+    for batch_index, batch in tqdm.tqdm(enumerate(loader), desc="Processing embeddings"):
         images, labels = batch
         if device == "cuda":
             images = [view.cuda() for view in images]

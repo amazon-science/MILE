@@ -27,7 +27,10 @@ class MVDataset(Dataset):
             class_dir = os.path.join(self.data_root, class_id)
             if not os.path.isdir(class_dir):
                 continue
-            samples = glob.glob(os.path.join(class_dir, "*.jpg"))
+            samples = [glob.glob(os.path.join(class_dir, ext)) for ext in ["*.jpg", "*.png"]]
+            samples = [e for source in samples for e in source]
+            if len(samples) == 0:
+                continue
             self.class_to_samples.append((class_id, samples))
             self.class_index[class_id] = len(self.class_index)
         
@@ -80,8 +83,7 @@ class RandomBLRPSampler:
         self.reverse_duplicate_samples = reverse_duplicate_samples
         self.deterministic = deterministic
         self.input_order = input_order
-        self.stitching = stitching
-        
+        self.stitching = stitching        
         logging.info(f"Reverse duplicate samples: {reverse_duplicate_samples}")
 
     def __call__(self, samples: List[str]) -> Optional[List[torch.Tensor]]:
@@ -104,7 +106,6 @@ class RandomBLRPSampler:
                 samples = sorted(samples, key=lambda e: os.path.basename(e))[:self.samples_per_class]
             else:
                 samples = random.sample(samples, self.samples_per_class)
-        
         samples = [Image.open(sample) for sample in samples]
         return [s for s in samples if s.mode == "RGB"]
 

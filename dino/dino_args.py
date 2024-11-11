@@ -116,6 +116,6 @@ def get_dino_args():
 
     parser.add_argument('--inference_noise_index', type=int, default=None)
     parser.add_argument('--stitching', type=utils.bool_flag, default=False)
-    parser.add_argument("--input_order", type=int)
+    parser.add_argument("--input_order", type=int, default=-1)
 
     return parser

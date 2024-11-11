@@ -7,13 +7,10 @@ import random
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
-from dino import utils
 import torch
 import torch.nn as nn
-import faiss
-import faiss.contrib.torch_utils
 from torchvision import transforms as pth_transforms
-from tqdm import tqdm
+import faiss
 
 from data.datasets import MVDataset, RandomBLRPSampler
 from dino.dino_args import get_dino_args
@@ -95,49 +92,27 @@ def compute_similarity_scores(one: torch.Tensor, other: torch.Tensor) -> torch.T
     return torch.cat(distances, dim=0)
 
 def compute_recalls(args: argparse.Namespace, X_train: np.ndarray, Y_train: np.ndarray, X_test: np.ndarray, Y_test: np.ndarray, cls_type: Tuple[int, int, str], k_max: int) -> Tuple[np.ndarray, float]:
-    n, m, average_fun = cls_type
+    cosine_index = faiss.IndexFlatIP(X_train.shape[-1])
+    cosine_index.add(X_train.cpu())
+    S, I = cosine_index.search(X_test.cpu(), k_max)
     classes_list = sorted(list(set([e.item() for e in Y_test])))
+
     is_covered = np.zeros((len(classes_list), k_max))
-
-    for idx, c in tqdm(enumerate(classes_list), total=len(classes_list)):
+    for idx, c in enumerate(classes_list):
         mask = Y_test == c
-        query = X_test[mask]
-
-        if n and query.shape[0] > n:
-            random_indices = range(n) if args.deterministic else [random.randint(0, query.shape[0] - 1) for _ in range(n)]
-            query = query[random_indices]
-
-        preds = []
-        for g in classes_list:
-            mask = Y_train == g
-            gallery = X_train[mask]
-            if gallery.shape[0] == 0:
-                raise ValueError(f"Missing class {g} from gallery")
-            if m and gallery.shape[0] > m:
-                random_indices = range(m) if args.deterministic else [random.randint(0, gallery.shape[0] - 1) for _ in range(m)]
-                gallery = gallery[random_indices]
-
-            S = compute_similarity_scores(query, gallery)
-
-            if average_fun is "rank_mv_max":
-                avg_score = S.item()
-            elif average_fun == "max":
-                avg_score = S.max().item()
-            elif average_fun == "average":
-                avg_score = S.mean(dim=(0, 1)).item()
-            else:
-                raise ValueError(f"Unknown average function: {average_fun}")
-            preds.append((g, avg_score))
-
-        preds = sorted(preds, key=lambda e: e[1], reverse=True)
-        good = False
+        I_ = I[mask]
+        S_ = S[mask]
+        I_max = S_.argmax(axis=0)
+        curr_covered = False
         for k in range(k_max):
-            if not good and preds[k][0] == c:
-                good = True
-            is_covered[idx, k] = 1 if good else 0
-
+            sample_idx = I_[I_max[k]][k]
+            pred = Y_train[sample_idx]
+            if pred == c:
+                curr_covered = True
+            is_covered[idx][k] = (1 if curr_covered else 0)
     recalls = is_covered.sum(axis=0) / is_covered.shape[0]
     m_recall = np.mean(recalls)
+    
     return recalls, m_recall
 
 def get_cls_types(args: argparse.Namespace) -> List[Tuple[int, int, str]]:
@@ -210,11 +185,6 @@ def main():
 
     for cls_type in cls_types:
         outfile = get_output_path(args, ckpt_path, cls_type)
-        
-        if os.path.exists(outfile):
-            logging.info(f"Metric already computed: {outfile}")
-            continue
-
         recalls, m_recall = compute_recalls(args, X_train, Y_train, X_test, Y_test, cls_type, args.k_max)
 
         logging.info(f"Writing results to: {outfile}")

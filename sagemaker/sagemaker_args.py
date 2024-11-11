@@ -16,11 +16,9 @@ def get_sagemaker_args():
 
     parser.add_argument("--ckpt_root", type=str, default="/shared/projects/iblrp/runs/")
     parser.add_argument("--ckpt_name", type=str, default=None)
-    parser.add_argument(
-        "--model_name",
-        type=str,
-        default="abl1_data=Abo_product_type_view=single_arch=vit_small_P=16_BS=100_E=100",
-    )
+    parser.add_argument("--model_name", type=str)
+    parser.add_argument("--base_model_name", type=str, default="dinov2-vitl14-reg")
+
 
     parser.add_argument("--pretrained_path", type=str, default=None)
     parser.add_argument("--cls_type", type=str, default="knn")

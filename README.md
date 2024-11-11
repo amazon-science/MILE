@@ -29,10 +29,27 @@ pip install -r requirements.txt
 
 To evaluate our model on the ABO dataset, run:
 
+
 ```eval
-python3 inference_MILE.py --local_run  --ckpt_root /home/digrigor/ebs/MILE/runs/  --dataset_name Abo_retrieval_test  --test_source test.query  --target_source test.target  --patch_size 14  --view blrp_pre_head  --output_type latent  --k_max 10  --data_path /home/digrigor/ebs/MILE/abo_test/  --stitching True  --peft on  --arch dinov2  --input_order 3  --samples_per_class 4  --model_name blrp-dinov2-vitl14-reg-fw1-stc-mt09996-bs3-800 --ckpt_name checkpoint0140.pth
+
+# OVERRIDE CKPT_ROOT and DATA_PATH with local paths
+
+CKPT_ROOT=/shared/projects/iblrp/runs/
+DATA_PATH=/shared/projects/iblrp/data/abo/inference_by_class/
+python inference_MILE.py --local_run  --ckpt_root $CKPT_ROOT  --dataset_name Abo_retrieval_test  --test_source test.query  --target_source test.target  --patch_size 14  --view blrp_pre_head  --output_type latent  --k_max 10  --data_path  $DATA_PATH --peft on  --arch dinov2  --samples_per_class 4  --model_name blrp-dinov2-vitl14-reg-lora0-fw-5e-06-mt09996-bs3-800 --ckpt_name checkpoint0390.pth
+
 ```
 
+
+```Internal test
+
+cd ./test
+bash test_abo_metrics.sh
+
+ABO: 85.90
+Retrieval: 73.06
+
+```
 
 ## Models
 
