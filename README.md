@@ -116,7 +116,7 @@ Our model achieves the following performance on :
 
 
 ## License 
-This project is released under the Apache 2.0 license. See [LICENSE](LICENSE) for more details. 
+This project is released under the CC-BY-NC 4.0 license. See [LICENSE](LICENSE) for more details. 
 
 ## Acknowledgement
 This repository is based on the [DINO repository](https://github.com/facebookresearch/dino). 
