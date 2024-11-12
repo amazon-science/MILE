@@ -58,6 +58,11 @@ class MVDataset(Dataset):
         label, samples = self.class_to_samples[index]
         crops = self.transform(samples)
         label = self.class_index[label]
+
+        if crops is None:
+            random_idx = random.randint(0, len(self) - 1)
+            return self.__getitem__(random_idx)
+        
         return crops, label
 
     def __len__(self) -> int:

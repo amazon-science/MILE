@@ -83,7 +83,7 @@ bash test_abo_metrics.sh
 
 ABO: 85.90
 Retrieval: 73.06
-iNat: TODO
+iNat: 95.05
 
 ```
 
