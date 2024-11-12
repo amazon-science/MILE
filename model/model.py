@@ -25,48 +25,24 @@ class ViTConf:
     num_classes: int = 0
     dynamic_img_size: bool = True
 
-MODEL_CONFIGS = {
-    "vit_b16_mae": ViTConf(patch_size=16, embed_dim=768, depth=12, num_heads=12),
-    "vit_b16_maws": ViTConf(patch_size=16, embed_dim=768, depth=12, num_heads=12),
-    "vit_l16_mae": ViTConf(patch_size=16, embed_dim=1024, depth=24, num_heads=16),
-    "vit_l16_maws": ViTConf(patch_size=16, embed_dim=1024, depth=24, num_heads=16),
-    "vit_h14_maws": ViTConf(patch_size=14, embed_dim=1280, depth=32, num_heads=16),
-}
-
-def get_backbone(type: str, model_name: str, patch_size: int, num_classes: int) -> nn.Module:
-    logging.info(f"Selecting backbone for {model_name}, type: {type}")
+def get_backbone(type: str, base_model_name: str) -> nn.Module:
+    logging.info(f"Selecting backbone for {base_model_name}, type: {type}")
     
     if type.startswith("dinov2"):
-        options = ["dinov2-vits14", "dinov2-vitb14", "dinov2-vitl14-reg", "dinov2-vitl14"]
-        for option in options:
-            if option in model_name:
-                logging.info(f"Loading base {option}")
-                return torch.hub.load("facebookresearch/dinov2", option.replace("-", "_"))
-        raise ValueError(f"{model_name} missing from {options}")
-    
+        return torch.hub.load("facebookresearch/dinov2", base_model_name)
     elif "maws" in type or "mae" in type:
-        for option, config in MODEL_CONFIGS.items():
-            model_key = option.replace("_", "-")
-            if model_key in model_name:
-                model = VisionTransformer(**asdict(config))
-                logging.info(f"Loading {option}")
-                state_dict = torch.load(f"./dino_distributed_training/dino_distributed/base_models/{option}.pt")
-                msg = model.load_state_dict(state_dict)
-                if str(msg) != "<All keys matched successfully>":
-                    raise ValueError(f"Error loading state dict: {msg}")
-                return model
-        raise ValueError(f"{model_name} missing from {MODEL_CONFIGS.keys()}")
+        return torch.hub.load("facebookresearch/maws", base_model_name)
+    else:
+        logging.error(f"Unknown arch type {type}")
+        return None
     
-    else:  # DinoV1
-        return vits.__dict__[type](patch_size=patch_size, num_classes=num_classes)
-
 def trainable_parameters(model: nn.Module) -> Tuple[int, int]:
     trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     all_params = sum(p.numel() for p in model.parameters())
     return trainable_params, all_params
 
 def init_model(args: Any, weight_path: Optional[str], num_classes: int, device: str, peft: bool = False) -> nn.Module:
-    model = get_backbone(args.arch, args.base_model_name, args.patch_size, num_classes)
+    model = get_backbone(args.arch, args.base_model_name)
     
     if args.view == "single":
         if weight_path:

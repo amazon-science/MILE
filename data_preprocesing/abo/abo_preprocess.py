@@ -44,10 +44,10 @@ def process_files(
         splits: List of split types to process.
     """
     os.makedirs(out_root, exist_ok=True)
-
-    missed = 0
-    found = 0
+  
     for split in splits:
+        missed = 0
+        found = 0
         split_out_dir = os.path.join(out_root, split.replace("-", "."))
         os.makedirs(split_out_dir, exist_ok=True)
         logging.info(f"Processing split: {split}")
@@ -72,14 +72,13 @@ def process_files(
             outfile = os.path.join(asin_out_dir, os.path.basename(row["path"]))
             shutil.copy(infile, outfile)
 
-    logging.info(f"Missed: {missed}")
-    logging.info(f"Found: {found}")
+        logging.info(f"{split} found: {found} / {found + missed}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process ABO dataset files.")
     parser.add_argument("--input_csv", help="Path to the input CSV file", default="./abo_raw_data/abo-mvr.csv.xz")
     parser.add_argument("--abo_images_root", help="Root directory containing ABO images", default="./abo_raw_data/images/small/")
-    parser.add_argument("--abo_spins_root", help="Root directory containing rendered ABO images", default="./abo_raw_data/images/small/")
+    parser.add_argument("--abo_spins_root", help="Root directory containing rendered ABO images", default="./abo_raw_data/abo-benchmark-material/")
     parser.add_argument("--out_root", help="Root directory for output files", default="./abo_raw_data/inference_by_class")
     args = parser.parse_args()
 

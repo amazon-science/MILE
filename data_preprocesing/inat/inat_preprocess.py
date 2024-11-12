@@ -1,9 +1,11 @@
 import os
 import cv2
-import numpy as np
-from multiprocessing import Pool
+import random
 from argparse import ArgumentParser
-from typing import List, Tuple
+from typing import Tuple
+import glob
+import shutil
+import tqdm
 
 SPLIT = 'train_val_images'
 SUPERCLASSES = [
@@ -11,55 +13,35 @@ SUPERCLASSES = [
     'Fungi', 'Insecta', 'Mammalia', 'Mollusca', 'Plantae', 'Protozoa', 'Reptilia'
 ]
 
-def process_image(image_path: str, target_path: str, location_prefix: str, md: str, suffix: str) -> None:
-    img = cv2.imread(image_path)
-    if img is not None:
-        cv2.imwrite(f"{target_path}/{location_prefix}/{md}_{suffix}/{os.path.basename(image_path)}", img)
-    else:
-        print(f"Failed to read image: {image_path}")
-
-def process_directory(args: Tuple[str, str, str]) -> None:
-    md, data_path, target_path = args
-    for sd in os.listdir(f"{data_path}/{SPLIT}/{md}/"):
+def process_directory(args: Tuple[str, str, str, int]) -> None:
+    md, data_path, target_path, num_sub_classes = args
+    classes = os.listdir(f"{data_path}/{SPLIT}/{md}/")
+    random.shuffle(classes)
+    if len(classes) > num_sub_classes:
+        classes = classes[:num_sub_classes]
+    for sd in classes:
         suffix = sd.replace(' ', '-')
         image_dir = f"{data_path}/{SPLIT}/{md}/{sd}"
-        image_names = [x for x in os.listdir(image_dir) if x.endswith('.jpg')]
+        image_files = glob.glob(os.path.join(image_dir, "*.jpg"))
+        th_index = len(image_files) // 2
+        for idx, img_file in enumerate(image_files):
+            location_prefix = "query" if idx <= th_index else "target"
+            outdir = f"{target_path}/{location_prefix}/{md}_{suffix}/"
+            os.makedirs(outdir, exist_ok=True)
+            outfile = os.path.join(outdir, os.path.basename(img_file))
+            shutil.copy(img_file, outfile)
 
-        os.makedirs(f"{target_path}/all/{md}_{suffix}", exist_ok=True)
-
-        for idx, obj_img in enumerate(image_names):
-            location_prefix = "query" if idx < 10 else "target"
-            process_image(f"{image_dir}/{obj_img}", target_path, location_prefix, md, suffix)
-
-def get_sorted_class_info(target_path: str) -> Tuple[List[str], List[int]]:
-    class_dirs = os.listdir(f"{target_path}/all")
-    class_count = [len(os.listdir(f"{target_path}/all/{c}")) for c in class_dirs]
-    indices = np.argsort(class_count)[::-1]
-    return [class_dirs[i] for i in indices], [class_count[i] for i in indices]
-
-def print_superclass_info(class_dirs: List[str], class_count: List[int]) -> None:
-    for sc in SUPERCLASSES:
-        subset = [(item, count) for item, count in zip(class_dirs, class_count) if sc in item]
-        for idx, (item, count) in enumerate(subset[:6]):
-            print(f"{sc:<15} --- {item:<30} --- {count}")
-
-def main(data_path: str, target_path: str) -> None:
+def main(data_path: str, target_path: str, num_sub_classes: int) -> None:
     meta_dirs = os.listdir(f"{data_path}/{SPLIT}/")
-
-    class_dirs, class_count = get_sorted_class_info(target_path)
-    print("Top 10 indices:", np.argsort(class_count)[::-1][:10])
-
-    print_superclass_info(class_dirs, class_count)
-
-    with Pool() as pool:
-        args = [(md, data_path, target_path) for md in meta_dirs]
-        pool.map(process_directory, args)
+    for md in tqdm.tqdm(meta_dirs):
+        args = (md, data_path, target_path, num_sub_classes)
+        process_directory(args)
 
 if __name__ == '__main__':
     parser = ArgumentParser(description="Process iNaturalist dataset files")
-    parser.add_argument("--data_path", type=str, default="./inat_raw_data/inference_by_class/images", help="Path to the data directory")
+    parser.add_argument("--data_path", type=str, default="./inat_raw_data/", help="Path to the data directory")
     parser.add_argument("--target_path", type=str, default="./inat_raw_data/inference_by_class", help="Path to the target directory")
-
+    parser.add_argument("--num_sub_classes", type=int, default=100, help="Number of classes per species")
+    
     args = parser.parse_args()
-
-    main(args.data_path, args.target_path)
+    main(args.data_path, args.target_path, args.num_sub_classes)

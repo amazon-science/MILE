@@ -55,19 +55,26 @@ The default output location is:
 
 ## Inference 
 
-To evaluate our model on the ABO dataset, run:
+To MILE on the ABO dataset, run:
 
 
 ```eval
 
 # OVERRIDE CKPT_ROOT and DATA_PATH with local paths
 
-CKPT_ROOT=/shared/projects/iblrp/runs/
-DATA_PATH=/shared/projects/iblrp/data/abo/inference_by_class/
+CKPT_ROOT=./test/ckpts/
+DATA_PATH=./data_preprocesing/abo/abo_raw_data/inference_by_class
 python inference_MILE.py --local_run  --ckpt_root $CKPT_ROOT  --dataset_name Abo_retrieval_test  --test_source test.query  --target_source test.target  --patch_size 14  --view multi-view  --output_type latent  --k_max 10  --data_path  $DATA_PATH --peft on  --arch dinov2  --samples_per_class 4  --model_name blrp-dinov2-vitl14-reg-lora0-fw-5e-06-mt09996-bs3-800 --ckpt_name checkpoint0390.pth
 
 ```
 
+To MILE on the iNaturalist dataset, run:
+
+```eval
+CKPT_ROOT=./test/ckpts/
+DATA_PATH=./data_preprocesing/abo/abo_raw_data/inference_by_class
+
+```
 
 ```Internal test
 
@@ -76,6 +83,7 @@ bash test_abo_metrics.sh
 
 ABO: 85.90
 Retrieval: 73.06
+iNat: TODO
 
 ```
 
