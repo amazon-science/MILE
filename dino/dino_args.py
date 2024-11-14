@@ -119,3 +119,20 @@ def get_dino_args():
     parser.add_argument("--input_order", type=int, default=-1)
 
     return parser
+
+
+def get_mile_args():
+    parser = argparse.ArgumentParser('MILE', add_help=False)
+
+    # MILE-specific parameters
+    parser.add_argument('--base_name', default='ty2-86.23', type=str, help='Base name for the experiment')
+    parser.add_argument('--view', default='blrp_pre_head', type=str, help='View type')
+    parser.add_argument('--cross_wi_patch_e', default='on', type=str, help='Cross with patch embedding')
+    parser.add_argument('--ignore_cls_in_lxs', default='on', type=str, help='Ignore CLS token in LXS')
+    parser.add_argument('--dinov2_force_cls_in_lxs', default='on', type=str, help='Force CLS token in LXS for DINOv2')
+    parser.add_argument('--gate_tanh', default='on', type=str, help='Use tanh in gate')
+    parser.add_argument('--peft', default='on', type=str, help='Use PEFT')
+
+    # You can add more MILE-specific arguments here
+
+    return parser

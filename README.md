@@ -4,7 +4,7 @@ _*George Leotescu***, *Alin-Ionut Popa***, Diana Grigore, Daniel Voinea, Pietro 
 
 This repository is the official implementation of [MILE](https://arxiv.org/abs/). 
 
-![](figures/overview_v11.png)
+![](figures/overview_v1.jpg)
 > Overview of MILE
 
 ## Requirements
@@ -20,7 +20,9 @@ pip install -r requirements.txt
 
 ## Training
 
-> We plan on releasing the training code. 
+```
+python3 train_MILE.py --data_path /home/digrigor/ebs/MILE/abo --output_dir /home/digrigor/ebs/MILE/debug --arch dinov2 --model_name dinov2_vitl14_reg --pretrained_path None --view multi-view --cross_wi_patch_e on --ignore_cls_in_lxs on --dinov2_force_cls_in_lxs on --out_dim 65536 --norm_last_layer False --warmup_teacher_temp 0.04 --teacher_temp 0.07 --warmup_teacher_temp_epochs 30 --lr 5e-06 --momentum_teacher 0.9996 --patch_size 14 --epochs 800  --batch_size_per_gpu 4 --gate_tanh on --peft on --samples_per_class 4 --stitchin \
+```
 
 ## Data Preparation
 

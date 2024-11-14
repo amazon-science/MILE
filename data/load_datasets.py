@@ -1,5 +1,4 @@
 import os
-import logging
 from typing import List, Optional, Dict, Any
 
 import datasets
@@ -7,8 +6,7 @@ from datasets import Dataset, DatasetDict
 
 from configs.local_config import LOCAL_S3_MAP
 from utils.s3_utils import get_processed_cache_name
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+from logger_config import logger
 
 class TransformDataset(Dataset):
     def __init__(self, subset: Dataset, transform: callable):
@@ -35,21 +33,21 @@ def load_raw_datasets(args: Any) -> DatasetDict:
     data_cache_dir = os.path.join(args.data_cache, args.dataset_name, "main")
     local_data_cache_dir = os.path.join(LOCAL_S3_MAP, data_cache_dir)
 
-    logging.info(f"Data cache dir: {data_cache_dir}")
-    logging.info(f"Local data cache dir: {local_data_cache_dir}")
+    logger.info.info(f"Data cache dir: {data_cache_dir}")
+    logger.info.info(f"Local data cache dir: {local_data_cache_dir}")
 
     if os.path.exists(local_data_cache_dir):
-        logging.info(f"Loading serialized dataset from {local_data_cache_dir}")
+        logger.info(f"Loading serialized dataset from {local_data_cache_dir}")
         datasets_map = datasets.load_from_disk(local_data_cache_dir)
     else:
-        logging.info("Loading raw dataset")
+        logger.info("Loading raw dataset")
         datasets_map = datasets.load_dataset("./data/AboDataset", args.dataset_name)
-        logging.info(f"Saving to local: {local_data_cache_dir}")
+        logger.info(f"Saving to local: {local_data_cache_dir}")
         datasets_map.save_to_disk(local_data_cache_dir)
-        logging.info(f"Saving to S3: s3://{args.s3_bucket}/{data_cache_dir}")
+        logger.info(f"Saving to S3: s3://{args.s3_bucket}/{data_cache_dir}")
         datasets_map.save_to_disk(os.path.join("s3://", args.s3_bucket, data_cache_dir))
 
-    logging.info(f"Data schema: {datasets_map}")
+    logger.info(f"Data schema: {datasets_map}")
     return datasets_map
 
 def load_datasets(
@@ -68,23 +66,23 @@ def load_datasets(
     processed_cache_dir = os.path.join(args.data_cache, args.dataset_name, processed_cache_name)
     local_processed_cache_dir = os.path.join(LOCAL_S3_MAP, processed_cache_dir)
 
-    logging.info(f"Data cache dir: {data_cache_dir}")
-    logging.info(f"Local data cache dir: {local_data_cache_dir}")
-    logging.info(f"Processed cache dir: {processed_cache_dir}")
-    logging.info(f"Local processed cache dir: {local_processed_cache_dir}")
+    logger.info(f"Data cache dir: {data_cache_dir}")
+    logger.info(f"Local data cache dir: {local_data_cache_dir}")
+    logger.info(f"Processed cache dir: {processed_cache_dir}")
+    logger.info(f"Local processed cache dir: {local_processed_cache_dir}")
 
     if os.path.exists(local_processed_cache_dir):
-        logging.info(f"Loading processed data from {local_processed_cache_dir}")
+        logger.info(f"Loading processed data from {local_processed_cache_dir}")
         return datasets.load_from_disk(local_processed_cache_dir)
 
     if os.path.exists(local_data_cache_dir):
-        logging.info(f"Loading serialized dataset from {local_data_cache_dir}")
+        logger.info(f"Loading serialized dataset from {local_data_cache_dir}")
         datasets_map = datasets.load_from_disk(local_data_cache_dir)
     else:
-        logging.info("Loading raw dataset")
+        logger.info("Loading raw dataset")
         datasets_map = datasets.load_dataset("./data/AboDataset", args.dataset_name)
 
-    logging.info(f"Data schema: {datasets_map}")
+    logger.info(f"Data schema: {datasets_map}")
 
     if args.sample:
         datasets_map = DatasetDict({
@@ -92,7 +90,7 @@ def load_datasets(
             for mode, dataset in datasets_map.items()
         })
 
-    logging.info(f"Applying processing for view: {args.view}")
+    logger.info(f"Applying processing for view: {args.view}")
     datasets_map = datasets_map.map(
         transform,
         batched=False,
@@ -104,5 +102,5 @@ def load_datasets(
     datasets_map.save_to_disk(local_processed_cache_dir)
     datasets_map.save_to_disk(os.path.join("s3://", args.s3_bucket, processed_cache_dir))
 
-    logging.info(f"Processed datasets: {datasets_map}")
+    logger.info(f"Processed datasets: {datasets_map}")
     return datasets_map

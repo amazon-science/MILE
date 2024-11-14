@@ -1,7 +1,6 @@
 import os
 import glob
 import random
-import logging
 from collections import defaultdict
 from typing import List, Tuple, Optional, Callable
 
@@ -10,7 +9,7 @@ from torch.utils.data import Dataset
 from torchvision import transforms
 from PIL import Image
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+from logger_config import logger
 
 class MVDataset(Dataset):
     def __init__(self, data_root: str, transform: Callable, subset_classes: Optional[int] = None):
@@ -19,9 +18,9 @@ class MVDataset(Dataset):
         self.class_to_samples: List[Tuple[str, List[str]]] = []
         self.class_index: dict = {}
 
-        logging.info(f"Reading data from {self.data_root}")
+        logger.info(f"Reading data from {self.data_root}")
         classes_list = self._get_filtered_classes(subset_classes)
-        logging.info(f"First 10 classes: {', '.join(classes_list[:10])}")
+        logger.info(f"First 10 classes: {', '.join(classes_list[:10])}")
 
         for class_id in classes_list:
             class_dir = os.path.join(self.data_root, class_id)
@@ -34,7 +33,7 @@ class MVDataset(Dataset):
             self.class_to_samples.append((class_id, samples))
             self.class_index[class_id] = len(self.class_index)
         
-        logging.info(f"Found {len(self.class_index)} classes")
+        logger.info(f"Found {len(self.class_index)} classes")
 
     def _get_filtered_classes(self, subset_classes: Optional[int]) -> List[str]:
         classes_list = list(os.listdir(self.data_root))
@@ -51,7 +50,7 @@ class MVDataset(Dataset):
                 continue
             filtered_classes_list.append(c)
         
-        logging.info(f"Classes pool {len(classes_list)} filtered to {len(filtered_classes_list)}")
+        logger.info(f"Classes pool {len(classes_list)} filtered to {len(filtered_classes_list)}")
         return filtered_classes_list
 
     def __getitem__(self, index: int) -> Tuple[List[torch.Tensor], int]:
@@ -89,7 +88,7 @@ class MILESampler:
         self.deterministic = deterministic
         self.input_order = input_order
         self.stitching = stitching        
-        logging.info(f"Reverse duplicate samples: {reverse_duplicate_samples}")
+        logger.info(f"Reverse duplicate samples: {reverse_duplicate_samples}")
 
     def __call__(self, samples: List[str]) -> Optional[List[torch.Tensor]]:
         samples = self._select_samples(samples)

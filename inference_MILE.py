@@ -1,7 +1,6 @@
 import argparse
 import glob
 import json
-import logging
 import os
 import random
 from typing import Dict, List, Optional, Tuple
@@ -15,10 +14,9 @@ import faiss
 from data.datasets import MVDataset, MILESampler
 from dino.dino_args import get_dino_args
 from dino.utils import fix_random_seeds
-from model.model import init_model, process_embeddings
+from model.inference_model import init_model, process_embeddings
 from sagemaker.sagemaker_args import get_sagemaker_args
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+from logger_config import logger
 
 SEED = 1
 random.seed(SEED)
@@ -39,7 +37,7 @@ def get_checkpoint_path(args: argparse.Namespace) -> Optional[str]:
     if not os.path.exists(ckpt_path):
         raise FileNotFoundError(f"Checkpoint not found: {ckpt_path}")
     
-    logging.info(f"Using checkpoint: {ckpt_path}")
+    logger.info(f"Using checkpoint: {ckpt_path}")
     return ckpt_path
 
 def get_transforms(args: argparse.Namespace) -> Dict[str, pth_transforms.Compose]:
@@ -79,7 +77,7 @@ def process_embeddings_for_modes(args: argparse.Namespace, model: nn.Module, dat
     for mode, dataset in datasets_map.items():
         if mode not in [args.target_source, args.test_source]:
             continue
-        logging.info(f"Processing embeddings for {mode}")
+        logger.info(f"Processing embeddings for {mode}")
         results[mode] = process_embeddings(args, model, dataset, args.output_type, device=device)
     return results
 
@@ -178,8 +176,8 @@ def main():
     assert X_train.shape[0] == Y_train.shape[0], f"Train shape mismatch: {X_train.shape} vs {Y_train.shape}"
     assert X_test.shape[0] == Y_test.shape[0], f"Test shape mismatch: {X_test.shape} vs {Y_test.shape}"
 
-    logging.info(f"X size train/test: {X_train.shape}, {X_test.shape}")
-    logging.info(f"Y size train/test: {Y_train.shape}, {Y_test.shape}")
+    logger.info(f"X size train/test: {X_train.shape}, {X_test.shape}")
+    logger.info(f"Y size train/test: {Y_train.shape}, {Y_test.shape}")
 
     cls_types = get_cls_types(args)
 
@@ -187,8 +185,8 @@ def main():
         outfile = get_output_path(args, ckpt_path, cls_type)
         recalls, m_recall = compute_recalls(args, X_train, Y_train, X_test, Y_test, cls_type, args.k_max)
 
-        logging.info(f"Writing results to: {outfile}")
-        logging.info(f"Mean recall: {m_recall}")
+        logger.info(f"Writing results to: {outfile}")
+        logger.info(f"Mean recall: {m_recall}")
 
         with open(outfile, "w") as f:
             json.dump({

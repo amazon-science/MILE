@@ -1,6 +1,7 @@
 import boto3
 import os
 
+from logger_config import logger
 
 def get_processed_cache_name(args):
     name = "RND_"
@@ -50,7 +51,7 @@ def download_bucket(input_path, output_path, bucket_name):
     os.makedirs(output_path, exist_ok=True)
     bucket = boto3.resource("s3").Bucket(bucket_name)
     data_files = bucket.objects.filter(Prefix=input_path)
-    print(f"downloading: {input_path} -> {output_path}")
+    logger.info(f"downloading: {input_path} -> {output_path}")
     for file in data_files:
         key = file.key
         path = key.replace(input_path, "")
@@ -58,6 +59,6 @@ def download_bucket(input_path, output_path, bucket_name):
         outdir = os.path.join(output_path, target_dir)
         os.makedirs(outdir, exist_ok=True)
         outfile = os.path.join(outdir, fname)
-        print("downloading", key, outfile)
+        logger.info("downloading", key, outfile)
         bucket.download_file(key, outfile)
     return output_path
