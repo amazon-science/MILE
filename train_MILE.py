@@ -21,7 +21,6 @@ from logger_config import logger
 from model.train_stud_teacher_arch import apply_peft,build_teacher, wrap_models
 from dino.utils import LARS, cosine_scheduler, fix_random_seeds, get_params_groups, get_world_size, has_batchnorms, is_main_process, save_on_master
 
-
 torchvision_archs = sorted(name for name in torchvision_models.__dict__
     if name.islower() and not name.startswith("__")
     and callable(torchvision_models.__dict__[name]))
@@ -189,5 +188,30 @@ def train_dino(args):
 
 if __name__ == '__main__':
     args = parse_arguments()
-    train_dino(args)
+
+    if not args.distributed_mode:
+        train_dino(args)
+    else:
+        from launch_dist_train import launch
+
+        machine_rank = os.environ["SM_CURRENT_HOST"]
+        try:
+            machine_rank = int(machine_rank.replace("algo-", "")) - 1
+            print(f"machine rank {os.environ['SM_CURRENT_HOST']} -> {machine_rank}")
+        except Exception as e:
+            assert False, f"FAILED parsing machine rank {machine_rank} {e}"
+
+        print("machines", args.num_machines)
+        print("num gpus", args.num_gpus)
+        print("dist url", args.dist_url)
+        launch(
+            train_dino,
+            num_gpus_per_machine = args.num_gpus,
+            num_machines = args.num_machines,
+            machine_rank = machine_rank,
+            dist_url = args.dist_url,
+            args=(args,),
+        )
+        print("TRAINING DONE")
+
     logger.info("TRAINING DONE")

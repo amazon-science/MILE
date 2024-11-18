@@ -1,3 +1,4 @@
+import dino.utils as utils
 import argparse
 
 
@@ -36,6 +37,7 @@ def get_sagemaker_args():
     parser.add_argument("--inference_res", type=int, default=224)
     parser.add_argument("--output_type", type=str, default=None)
     parser.add_argument("--num_gpus", type=int, default=1)
+    parser.add_argument("--distributed_mode", type=utils.bool_flag, default=False)
 
     # multi view
     parser.add_argument(
