@@ -1,7 +1,7 @@
-from dataclasses import asdict
+import logging
+from dataclasses import asdict, dataclass
 from typing import Dict, Any, Optional, List, Tuple
 
-from model.utils import MODEL_CONFIGS, trainable_parameters
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
@@ -13,19 +13,33 @@ import dino.vision_transformer as vits
 import dino.utils as utils
 from dino.utils import MILE, CrossAttentionBlock
 from dino.vision_transformer import DINOHead
-from logger_config import logger
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+@dataclass
+class ViTConf:
+    patch_size: int
+    embed_dim: int
+    depth: int
+    num_heads: int
+    num_classes: int = 0
+    dynamic_img_size: bool = True
 
 def get_backbone(type: str, base_model_name: str) -> nn.Module:
-    logger.info(f"Selecting backbone for {base_model_name}, type: {type}")
+    logging.info(f"Selecting backbone for {base_model_name}, type: {type}")
     
     if type.startswith("dinov2"):
         return torch.hub.load("facebookresearch/dinov2", base_model_name)
     elif "maws" in type or "mae" in type:
         return torch.hub.load("facebookresearch/maws", base_model_name)
     else:
-        logger.error(f"Unknown arch type {type}")
+        logging.error(f"Unknown arch type {type}")
         return None
     
+def trainable_parameters(model: nn.Module) -> Tuple[int, int]:
+    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    all_params = sum(p.numel() for p in model.parameters())
+    return trainable_params, all_params
 
 def init_model(args: Any, weight_path: Optional[str], num_classes: int, device: str, peft: bool = False) -> nn.Module:
     model = get_backbone(args.arch, args.base_model_name)
@@ -43,7 +57,7 @@ def init_model(args: Any, weight_path: Optional[str], num_classes: int, device: 
             )
             model = get_peft_model(model, config)
             tp, ap = trainable_parameters(model)
-            logger.info(f"LoRA trainable params: {tp} || all params: {ap} || trainable%: {100 * tp / ap:.2f}")
+            logging.info(f"LoRA trainable params: {tp} || all params: {ap} || trainable%: {100 * tp / ap:.2f}")
     
     elif args.view == "multi-view":
         if peft:
@@ -53,7 +67,7 @@ def init_model(args: Any, weight_path: Optional[str], num_classes: int, device: 
             )
             model = get_peft_model(model, config)
             tp, ap = trainable_parameters(model)
-            logger.info(f"LoRA trainable params: {tp} || all params: {ap} || trainable%: {100 * tp / ap:.2f}")
+            logging.info(f"LoRA trainable params: {tp} || all params: {ap} || trainable%: {100 * tp / ap:.2f}")
         
         embed_dim = model.embed_dim
         dual_latent_cross = CrossAttentionBlock(dim=embed_dim, proj_dim=2*embed_dim, explicit_residual=args.explicit_residual) if args.dual_condition else None
@@ -82,7 +96,7 @@ def init_model(args: Any, weight_path: Optional[str], num_classes: int, device: 
         )
         
         if weight_path:
-            logger.info(f"Loading model from {weight_path}, source: {args.model_source}")
+            logging.info(f"Loading model from {weight_path}, source: {args.model_source}")
             state_dict = torch.load(weight_path, map_location="cpu")[args.model_source]
             if args.model_source == "student":
                 state_dict = {k.replace("module.", ""): v for k, v in state_dict.items()}

@@ -14,7 +14,8 @@ from torchvision import models as torchvision_models
 from data.datasets import MILESampler, MVDataset
 from dino.data import DataAugmentationDINO
 from dino.dino_train import DINOLoss, train_one_epoch
-from dino.dino_args import get_dino_args
+from dino.dino_args import get_dino_args, get_mile_args
+from sagemaker.sagemaker_args import get_sagemaker_args
 
 from logger_config import logger
 from model.train_stud_teacher_arch import apply_peft,build_teacher, wrap_models
@@ -26,7 +27,7 @@ torchvision_archs = sorted(name for name in torchvision_models.__dict__
     and callable(torchvision_models.__dict__[name]))
 
 def parse_arguments():
-    parser = argparse.ArgumentParser('DINO', parents=[get_dino_args()])
+    parser = argparse.ArgumentParser('DINO', parents=[get_dino_args(), get_mile_args(), get_sagemaker_args()])
     return parser.parse_args()
 
 def setup_environment(args):
@@ -52,6 +53,8 @@ def prepare_data(args):
             stitching=args.stitching
         )
         dataset = MVDataset(args.data_path, random_k_samples)
+    else:
+        raise ValueError(f"Unknown view mode {args.view}")
     
     sampler = torch.utils.data.DistributedSampler(dataset, shuffle=True) if args.num_gpus > 1 else torch.utils.data.RandomSampler(dataset)
     
@@ -168,15 +171,16 @@ def train_dino(args):
         
         if fp16_scaler is not None:
             save_dict['fp16_scaler'] = fp16_scaler.state_dict()
-        save_on_master(save_dict, os.path.join(args.output_dir, 'checkpoint.pth'))
-        if args.saveckp_freq and (epoch < 10 or (epoch % args.saveckp_freq == 0)):
-            save_on_master(save_dict, os.path.join(args.output_dir, f'checkpoint{epoch:04}.pth'))
         log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
                      'epoch': epoch}
         if is_main_process():
+            os.path.makedirs(args.output_dir, exist_ok=True)
             with (Path(args.output_dir) / "log.txt").open("a") as f:
                 f.write(json.dumps(log_stats) + "\n")
-        
+            save_on_master(save_dict, os.path.join(args.output_dir, 'checkpoint.pth'))
+            if args.saveckp_freq and (epoch < 10 or (epoch % args.saveckp_freq == 0)):
+                save_on_master(save_dict, os.path.join(args.output_dir, f'checkpoint{epoch:04}.pth'))
+    
         logger.info(f"Epoch {epoch} completed. Train stats: {train_stats}")
 
     total_time = time.time() - start_time

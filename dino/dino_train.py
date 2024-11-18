@@ -29,7 +29,6 @@ def train_one_epoch(student, teacher, teacher_without_ddp, dino_loss, data_loade
             images = [[im.cuda() for im in view] for view in images]
             # teacher and student forward passes + compute dino loss
             with torch.cuda.amp.autocast(fp16_scaler is not None):
-    
                 teacher_output = teacher([view[:2] for view in images])  # only the 2 global views pass through the teacher
                 student_output = student(images)
                 loss = dino_loss(student_output, teacher_output, epoch)
@@ -58,7 +57,7 @@ def train_one_epoch(student, teacher, teacher_without_ddp, dino_loss, data_loade
                 optimizer.zero_grad()
                 update_ema = True
         else:
-            assert False, "loss scaler not expected"
+            assert False, "Loss scaler not expected."
  
 
         if update_ema and not args.distil_frozen_teacher: # if distilation, no need to update teacher

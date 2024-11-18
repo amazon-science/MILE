@@ -38,7 +38,7 @@ def get_dino_args():
         help='Number of warmup epochs for the teacher temperature (Default: 30).')
 
     # Training/Optimization parameters
-    parser.add_argument('--use_fp16', type=utils.bool_flag, default=True, help="""Whether or not
+    parser.add_argument('--use_fp16', type=utils.bool_flag, default=False, help="""Whether or not
         to use half precision for training. Improves training time and memory requirements,
         but can provoke instability and slight decay of performance. We recommend disabling
         mixed precision if the loss is unstable, if reducing the patch size or if training with bigger ViTs.""")
@@ -52,6 +52,8 @@ def get_dino_args():
         help optimization for larger ViT architectures. 0 for disabling.""")
     parser.add_argument('--batch_size_per_gpu', default=64, type=int,
         help='Per-GPU batch-size : number of distinct images loaded on one GPU.')
+    parser.add_argument('--gradient_acc_steps', default=1, type=int,
+        help='Gradient accumulation steps.')
     parser.add_argument('--epochs', default=100, type=int, help='Number of epochs of training.')
     parser.add_argument('--freeze_last_layer', default=1, type=int, help="""Number of epochs
         during which we keep the output layer fixed. Typically doing so during
@@ -99,12 +101,7 @@ def get_dino_args():
     parser.add_argument("--subset_classes", default=None, type=int, help="subset classes")
     parser.add_argument("--no_pad", type=utils.bool_flag, default=False)
     parser.add_argument("--deterministic", type=utils.bool_flag, default=False)
-    parser.add_argument("--peft", type=utils.bool_flag, default=False)
     parser.add_argument("--latent_cross_heads", type=int, default=1)
-
-    parser.add_argument("--cross_wi_patch_e", type=utils.bool_flag, default=False)
-    parser.add_argument("--ignore_cls_in_lxs", type=utils.bool_flag, default=False)
-    parser.add_argument("--dinov2_force_cls_in_lxs", type=utils.bool_flag, default=False)
 
     parser.add_argument("--duplicate_samples", type=int, default=1)
     parser.add_argument("--reverse_duplicate_samples", type=utils.bool_flag, default=True)
@@ -112,7 +109,6 @@ def get_dino_args():
 
     parser.add_argument("--cross_wi_registers", type=utils.bool_flag, default=False)
     parser.add_argument("--fold_cls_registers", type=utils.bool_flag, default=False)
-
 
     parser.add_argument('--inference_noise_index', type=int, default=None)
     parser.add_argument('--stitching', type=utils.bool_flag, default=False)
@@ -126,12 +122,14 @@ def get_mile_args():
 
     # MILE-specific parameters
     parser.add_argument('--base_name', default='ty2-86.23', type=str, help='Base name for the experiment')
-    parser.add_argument('--view', default='blrp_pre_head', type=str, help='View type')
-    parser.add_argument('--cross_wi_patch_e', default='on', type=str, help='Cross with patch embedding')
-    parser.add_argument('--ignore_cls_in_lxs', default='on', type=str, help='Ignore CLS token in LXS')
-    parser.add_argument('--dinov2_force_cls_in_lxs', default='on', type=str, help='Force CLS token in LXS for DINOv2')
-    parser.add_argument('--gate_tanh', default='on', type=str, help='Use tanh in gate')
-    parser.add_argument('--peft', default='on', type=str, help='Use PEFT')
+    parser.add_argument('--view', default='multi-view', type=str, help='View type')
+    parser.add_argument('--cross_wi_patch_e', default=False, type=utils.bool_flag, help='Cross with patch embedding')
+    parser.add_argument('--ignore_cls_in_lxs', default=False, type=utils.bool_flag, help='Ignore CLS token in LXS')
+    parser.add_argument('--dinov2_force_cls_in_lxs', default=False, type=utils.bool_flag, help='Force CLS token in LXS for DINOv2')
+    parser.add_argument('--gate_tanh', default=True, type=utils.bool_flag, help='Use tanh in gate')
+    parser.add_argument('--peft', default=True, type=utils.bool_flag, help='Use PEFT')
+    parser.add_argument('--distil_frozen_teacher', default=False, type=utils.bool_flag, help='Distil from frozen teacher')
+    parser.add_argument('--dual_gate_tanh', default=False, type=utils.bool_flag, help='Deprecated // independent tanh gating')
 
     # You can add more MILE-specific arguments here
 

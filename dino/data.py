@@ -1,5 +1,6 @@
 from dino import utils
 from torchvision import datasets, transforms
+from PIL import Image
 
 class DataAugmentationDINO(object):
     def __init__(self, global_crops_scale, local_crops_scale, local_crops_number, patch_size):

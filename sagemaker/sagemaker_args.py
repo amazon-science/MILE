@@ -31,13 +31,11 @@ def get_sagemaker_args():
     parser.add_argument("--k_max", type=int, default=10)
 
     parser.add_argument("--knn_sample_train", type=float, default=1)
-
-    parser.add_argument("--view", type=str, default="single")
     parser.add_argument("--acc_steps", type=int, default=1)
     parser.add_argument("--label_map", type=str, default=None)
     parser.add_argument("--inference_res", type=int, default=224)
-
     parser.add_argument("--output_type", type=str, default=None)
+    parser.add_argument("--num_gpus", type=int, default=1)
 
     # multi view
     parser.add_argument(

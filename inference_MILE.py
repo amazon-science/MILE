@@ -12,7 +12,7 @@ from torchvision import transforms as pth_transforms
 import faiss
 
 from data.datasets import MVDataset, MILESampler
-from dino.dino_args import get_dino_args
+from dino.dino_args import get_dino_args, get_mile_args
 from dino.utils import fix_random_seeds
 from model.inference_model import init_model, process_embeddings
 from sagemaker.sagemaker_args import get_sagemaker_args
@@ -23,7 +23,7 @@ random.seed(SEED)
 fix_random_seeds(SEED)
 
 def parse_arguments() -> argparse.Namespace:
-    parser = argparse.ArgumentParser("DINO_SGM", parents=[get_dino_args(), get_sagemaker_args()])
+    parser = argparse.ArgumentParser("DINO_SGM", parents=[get_dino_args(), get_mile_args(), get_sagemaker_args()])
     return parser.parse_args()
 
 def get_checkpoint_path(args: argparse.Namespace) -> Optional[str]:
@@ -193,6 +193,4 @@ def main():
                 "recalls": [float(e) for e in recalls.tolist()],
                 "mean": float(m_recall),
             }, f, indent=2)
-
-if __name__ == "__main__":
-    main()
+            

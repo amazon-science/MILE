@@ -20,8 +20,9 @@ pip install -r requirements.txt
 
 ## Training
 
-```
-python3 train_MILE.py --data_path /home/digrigor/ebs/MILE/abo --output_dir /home/digrigor/ebs/MILE/debug --arch dinov2 --model_name dinov2_vitl14_reg --pretrained_path None --view multi-view --cross_wi_patch_e on --ignore_cls_in_lxs on --dinov2_force_cls_in_lxs on --out_dim 65536 --norm_last_layer False --warmup_teacher_temp 0.04 --teacher_temp 0.07 --warmup_teacher_temp_epochs 30 --lr 5e-06 --momentum_teacher 0.9996 --patch_size 14 --epochs 800  --batch_size_per_gpu 4 --gate_tanh on --peft on --samples_per_class 4 --stitchin \
+```eval
+DATA_PATH=/large_shared/cosine-asin-image-similarity/train_wo_per_asin_case_data_dedupe_gt4_unique_vitl
+python train_MILE.py --data_path $DATA_PATH --saveckp_freq 1 --arch dinov2 --model_name dinov2_vitl14_reg --view multi-view --out_dim 65536 --norm_last_layer False --warmup_teacher_temp 0.04 --teacher_temp 0.07 --warmup_teacher_temp_epochs 0 --lr 6.25e-07 --momentum_teacher 0.996 --patch_size 14 --epochs 20 --batch_size_per_gpu 3 --gate_tanh on --peft on --output_dir ./test/tmp/
 ```
 
 ## Data Preparation
