@@ -91,9 +91,7 @@ iNat: 95.05
 
 ## Models
 
-You can download our trained models 
-
-- [MILE]() trained on ABO using parameters -. 
+You can download our trained models from our [HuggingFace repository](https://huggingface.co/AmazonScience/MILE/)
 
 ## Results
 
