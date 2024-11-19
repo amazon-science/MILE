@@ -1,6 +1,7 @@
 from dataclasses import asdict
-from dino.utils import MILE, CrossAttentionBlock
+from model.model import CrossAttentionBlock
 from dino.vision_transformer import VisionTransformer
+from model.model import MILE
 from model.utils import MODEL_CONFIGS, trainable_parameters
 from peft import LoraConfig, get_peft_model
 
@@ -9,18 +10,6 @@ import dino.utils as utils
 import dino.vision_transformer as vits
 from dino.vision_transformer import DINOHead
 from logger_config import logger
-
-def build_student(args):
-    if args.arch in vits.__dict__.keys():
-        student = vits.__dict__[args.arch](patch_size=args.patch_size, drop_path_rate=args.drop_path_rate)
-    elif args.arch == "dinov2":
-        student = torch.hub.load('facebookresearch/dinov2', args.model_name)
-    elif args.arch == "maws":
-        model_config = MODEL_CONFIGS[args.model_name]
-        student = VisionTransformer(**asdict(model_config))
-    else:
-        raise ValueError(f"Unknown architecture: {args.arch}")
-    return student 
 
 def build_teacher(args):
     args.arch = args.arch.replace("deit", "vit")
@@ -70,26 +59,64 @@ def wrap_models(student, teacher, args):
         teacher_cross_wi_patch_e = args.cross_wi_patch_e if not args.distil_frozen_teacher else False
 
         student = MILE(
-            backbone=utils.MultiCropWrapper(student, None),
-            latent_cross=CrossAttentionBlock(dim=embed_dim, proj_dim=2*embed_dim, explicit_residual=args.explicit_residual, num_heads=args.latent_cross_heads),
+            backbone=utils.MultiCropWrapper(teacher, None),
+            latent_cross=CrossAttentionBlock(
+                dim=embed_dim, 
+                proj_dim=2 * embed_dim, 
+                explicit_residual=args.explicit_residual, 
+                num_heads=args.latent_cross_heads
+            ),
             dual_latent_cross=student_dual,
-            final_projection=DINOHead(embed_dim, args.out_dim, use_bn=args.use_bn_in_head, norm_last_layer=args.norm_last_layer),
-            num_global_crops=2, num_local_crops=args.local_crops_number, gate_tanh=args.gate_tanh, dual_gate_tanh=args.dual_gate_tanh, 
-            bi_directional=args.bi_directional, union_latent_keys=args.union_latent_keys, backward_dual_latent_cross=args.backward_dual_latent_cross, 
-            cross_wi_patch_e=student_cross_wi_patch_e, ignore_cls_in_lxs=args.ignore_cls_in_lxs, cross_wi_registers=args.cross_wi_registers, 
-            arch=args.arch, dinov2_force_cls_in_lxs=args.dinov2_force_cls_in_lxs
+            final_projection=DINOHead(
+                embed_dim, 
+                args.out_dim, 
+                use_bn=args.use_bn_in_head, 
+                norm_last_layer=args.norm_last_layer
+            ),
+            num_global_crops=2, 
+            num_local_crops=args.local_crops_number, 
+            cross_wi_patch_e=student_cross_wi_patch_e,
+            gate_tanh=args.gate_tanh,
+            dual_gate_tanh=args.dual_gate_tanh,
+            bi_directional=args.bi_directional,
+            union_latent_keys=args.union_latent_keys,
+            backward_dual_latent_cross=args.backward_dual_latent_cross,
+            ignore_cls_in_lxs=args.ignore_cls_in_lxs,
+            cross_wi_registers=args.cross_wi_registers,
+            arch=args.arch,
+            dinov2_force_cls_in_lxs=args.dinov2_force_cls_in_lxs
         )
+        
         
         teacher = MILE(
             backbone=utils.MultiCropWrapper(teacher, None),
-            latent_cross=CrossAttentionBlock(dim=embed_dim, proj_dim=2*embed_dim, explicit_residual=args.explicit_residual, num_heads=args.latent_cross_heads),
+            latent_cross=CrossAttentionBlock(
+                dim=embed_dim, 
+                proj_dim=2 * embed_dim, 
+                explicit_residual=args.explicit_residual, 
+                num_heads=args.latent_cross_heads
+            ),
             dual_latent_cross=teacher_dual,
-            final_projection=DINOHead(embed_dim, args.out_dim, use_bn=args.use_bn_in_head, norm_last_layer=args.norm_last_layer),
-            num_global_crops=2, num_local_crops=args.local_crops_number, gate_tanh=args.gate_tanh, dual_gate_tanh=args.dual_gate_tanh, 
-            bi_directional=args.bi_directional, union_latent_keys=args.union_latent_keys, backward_dual_latent_cross=args.backward_dual_latent_cross, 
-            cross_wi_patch_e=teacher_cross_wi_patch_e, ignore_cls_in_lxs=args.ignore_cls_in_lxs, cross_wi_registers=args.cross_wi_registers, 
-            arch=args.arch, dinov2_force_cls_in_lxs=args.dinov2_force_cls_in_lxs
+            final_projection=DINOHead(
+                embed_dim, 
+                args.out_dim, 
+                use_bn=args.use_bn_in_head, 
+                norm_last_layer=args.norm_last_layer
+            ),
+            num_global_crops=2, 
+            num_local_crops=args.local_crops_number, 
+            cross_wi_patch_e=teacher_cross_wi_patch_e,
+            gate_tanh=args.gate_tanh,
+            dual_gate_tanh=args.dual_gate_tanh,
+            bi_directional=args.bi_directional,
+            union_latent_keys=args.union_latent_keys,
+            backward_dual_latent_cross=args.backward_dual_latent_cross,
+            ignore_cls_in_lxs=args.ignore_cls_in_lxs,
+            cross_wi_registers=args.cross_wi_registers,
+            arch=args.arch,
+            dinov2_force_cls_in_lxs=args.dinov2_force_cls_in_lxs
         )
+        
     else:
         student = utils.MultiCropWrapper(student, DINOHead(
             embed_dim,

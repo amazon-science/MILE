@@ -78,13 +78,12 @@ DATA_PATH=./data_preprocesing/abo/abo_raw_data/inference_by_class
 
 ```
 
-```Internal test
+```Test
 
 cd ./test
-bash test_abo_metrics.sh
+bash test.sh
 
 ABO: 85.90
-Retrieval: 73.06
 iNat: 95.05
 
 ```

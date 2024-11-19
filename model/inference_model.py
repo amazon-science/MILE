@@ -1,6 +1,7 @@
 from dataclasses import asdict
 from typing import Dict, Any, Optional, List, Tuple
 
+from model.model import MILE
 from model.utils import MODEL_CONFIGS, trainable_parameters
 import torch
 import torch.nn as nn
@@ -11,7 +12,7 @@ from peft import LoraConfig, get_peft_model
 
 import dino.vision_transformer as vits
 import dino.utils as utils
-from dino.utils import MILE, CrossAttentionBlock
+from model.model import CrossAttentionBlock
 from dino.vision_transformer import DINOHead
 from logger_config import logger
 

@@ -19,7 +19,7 @@ from sagemaker.sagemaker_args import get_sagemaker_args
 
 from logger_config import logger
 from model.train_stud_teacher_arch import apply_peft,build_teacher, wrap_models
-from dino.utils import LARS, cosine_scheduler, fix_random_seeds, get_params_groups, get_world_size, has_batchnorms, is_main_process, save_on_master
+from dino.utils import cosine_scheduler, fix_random_seeds, get_params_groups, get_world_size, has_batchnorms, is_main_process, save_on_master
 
 torchvision_archs = sorted(name for name in torchvision_models.__dict__
     if name.islower() and not name.startswith("__")
@@ -112,8 +112,8 @@ def setup_loss_and_optimizer(args, student):
         optimizer = torch.optim.AdamW(params_groups)
     elif args.optimizer == "sgd":
         optimizer = torch.optim.SGD(params_groups, lr=0, momentum=0.9)
-    elif args.optimizer == "lars":
-        optimizer = LARS(params_groups)
+    else:
+        raise ValueError(f"Unknown optimizer {args.optimizer}")
 
     fp16_scaler = torch.cuda.amp.GradScaler() if args.use_fp16 else None
 

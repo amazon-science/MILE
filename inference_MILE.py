@@ -194,3 +194,6 @@ def main():
                 "mean": float(m_recall),
             }, f, indent=2)
             
+
+if __name__ == "__main__":
+    main()
