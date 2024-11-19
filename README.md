@@ -4,8 +4,13 @@ _*George Leotescu***, *Alin-Ionut Popa***, Diana Grigore, Daniel Voinea, Pietro 
 
 This repository is the official implementation of [MILE](https://arxiv.org/abs/). 
 
-![](figures/overview_v1.jpg)
-> Overview of MILE
+![](figures/overview_v11.jpg)
+> This repository presents the implementation of a novel framework for generating holistic embeddings of visual concepts from multiple images using self-supervised learning (SSL). Key features include:
+>*  a structured multi-image embedding via sequential latent space modeling
+>* an incremental object representation update mechanism
+>* an SSL training framework adapted for multi-image inputs. 
+>
+>The approach introduces a new formulation of object retrieval based on image sets and overcomes geometrical constraints imposed by rigid objects in multi-image setups. Validated on the ABO and iNaturalist datasets, the framework outperforms competitive self and weakly supervised methods in object retrieval tasks. It utilizes ViT family backbones but is compatible with any image encoder. The multi-image approach accommodates various visual distributions of the same object without viewpoint consistency constraints, making it more flexible than traditional multi-view setups. This implementation aims to learn from a broader and more diverse training set, avoiding the limitations of contrastive learning approaches that require numerous images per object.
 
 ## Requirements
 
@@ -17,25 +22,21 @@ conda activate MILE
 pip install -r requirements.txt
 ```
 
-## Training
-
-```eval
-DATA_PATH=/large_shared/cosine-asin-image-similarity/train_wo_per_asin_case_data_dedupe_gt4_unique_vitl
-python train_MILE.py --data_path $DATA_PATH --saveckp_freq 1 --arch dinov2 --model_name dinov2_vitl14_reg --view multi-view --out_dim 65536 --norm_last_layer False --warmup_teacher_temp 0.04 --teacher_temp 0.07 --warmup_teacher_temp_epochs 0 --lr 6.25e-07 --momentum_teacher 0.996 --patch_size 14 --epochs 20 --batch_size_per_gpu 3 --gate_tanh on --peft on --output_dir ./test/tmp/
-```
 
 ## Data Preparation
 
 ### Amazon Berkeley Objects (ABO) Dataset
 
+To download and preprocess the data:
+
 ```eval
 cd ./data_processing/abo
 bash download_raw_data.sh
 python abo_preprocess.py
-
 ```
 
-This will generate the data splits for the original "CVPR22 Multi-View Retrieval experiments"
+*This will generate the data splits for the original [CVPR22 Multi-View Retrieval experiments](!https://openaccess.thecvf.com/content/CVPR2022/html/Collins_ABO_Dataset_and_Benchmarks_for_Real-World_3D_Object_Understanding_CVPR_2022_paper.html)*
+
 The default output location is:
 ```eval
 ./data_preprocesing/abo/abo_raw_data/inference_by_class
@@ -43,41 +44,50 @@ The default output location is:
 
 ### iNaturalist
 
+To download and preprocess the data:
+
 ```
 cd ./data_processing/inat
 bash download_raw_data.sh
 python inat_preprocess.py
-
 ```
 
 The default output location is:
 ```eval
 ./data_preprocesing/inat/inat_raw_data/inference_by_class
 ```
+## Training
+
+```eval
+# OVERRIDE CKPT_ROOT and DATA_PATH with local paths
+
+DATA_PATH=/large_shared/cosine-asin-image-similarity/train_wo_per_asin_case_data_dedupe_gt4_unique_vitl
+python train_MILE.py --data_path $DATA_PATH --saveckp_freq 1 --arch dinov2 --model_name dinov2_vitl14_reg --view multi-view --out_dim 65536 --norm_last_layer False --warmup_teacher_temp 0.04 --teacher_temp 0.07 --warmup_teacher_temp_epochs 0 --lr 6.25e-07 --momentum_teacher 0.996 --patch_size 14 --epochs 20 --batch_size_per_gpu 3 --gate_tanh on --peft on --output_dir ./test/tmp/
+```
 
 ## Inference 
 
-To MILE on the ABO dataset, run:
+To perform inference with MILE on the **ABO** dataset, run:
 
 
 ```eval
-
-# OVERRIDE CKPT_ROOT and DATA_PATH with local paths
 
 CKPT_ROOT=./test/ckpts/
 DATA_PATH=./data_preprocesing/abo/abo_raw_data/inference_by_class
 python inference_MILE.py --local_run  --ckpt_root $CKPT_ROOT  --dataset_name Abo_retrieval_test  --test_source test.query  --target_source test.target  --patch_size 14  --view multi-view  --output_type latent  --k_max 10  --data_path  $DATA_PATH --peft on  --arch dinov2  --samples_per_class 4  --model_name blrp-dinov2-vitl14-reg-lora0-fw-5e-06-mt09996-bs3-800 --ckpt_name checkpoint0390.pth
-
 ```
 
-To MILE on the iNaturalist dataset, run:
+To perform inference with MILE on the **iNaturalist** dataset, run:
 
 ```eval
-CKPT_ROOT=./test/ckpts/
-DATA_PATH=./data_preprocesing/abo/abo_raw_data/inference_by_class
 
+
+CKPT_ROOT=./test/ckpts/
+DATA_PATH=./data_preprocesing/inat/inat_raw_data/inference_by_class
+python inference_MILE.py --local_run  --ckpt_root $CKPT_ROOT  --dataset_name iNaturalist_100  --test_source query  --target_source target  --patch_size 16  --view multi-view  --output_type latent  --k_max 10  --data_path $DATA_PATH  --subset_classes 100  --arch maws  --peft on  --samples_per_class 4  --base_model_name vit_h14_maws  --model_name blrp-vit-h14-maws-nat-lora0-fw-5e-06-mt09996-bs2-8000 --ckpt_name checkpoint2475.pth
 ```
 
+To validate your setup, run the following test:
 ```Test
 
 cd ./test
@@ -85,12 +95,11 @@ bash test.sh
 
 ABO: 85.90
 iNat: 95.05
-
 ```
 
 ## Models
 
-You can download our trained models from our [HuggingFace repository](https://huggingface.co/AmazonScience/MILE/)
+You can download our trained models from our [HuggingFace repository](https://huggingface.co/AmazonScience/MILE/).
 
 ## Results
 
