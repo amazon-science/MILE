@@ -1,3 +1,19 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Original Copyright 2021 Facebook, Inc. and its affiliates. Licensed under the Apache License, Version 2.0
+# Modifications Copyright 2024 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 import argparse
 import dino.utils as utils
 
@@ -109,14 +125,14 @@ def get_dino_args():
 
     parser.add_argument("--cross_wi_registers", type=utils.bool_flag, default=False)
     parser.add_argument("--fold_cls_registers", type=utils.bool_flag, default=False)
-
+    # 2024-11-22: Amazon addition.
     parser.add_argument('--inference_noise_index', type=int, default=None)
     parser.add_argument('--stitching', type=utils.bool_flag, default=False)
     parser.add_argument("--input_order", type=int, default=-1)
-
+    # 2024-11-22: End of Amazon addition.
     return parser
 
-
+# 2024-11-22: Amazon addition.
 def get_mile_args():
     parser = argparse.ArgumentParser('MILE', add_help=False)
 
@@ -131,6 +147,5 @@ def get_mile_args():
     parser.add_argument('--distil_frozen_teacher', default=False, type=utils.bool_flag, help='Distil from frozen teacher')
     parser.add_argument('--dual_gate_tanh', default=False, type=utils.bool_flag, help='Deprecated // independent tanh gating')
 
-    # You can add more MILE-specific arguments here
-
     return parser
+# 2024-11-22: End of Amazon addition.

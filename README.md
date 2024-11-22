@@ -163,7 +163,7 @@ Our model achieves the following performance on :
 This project is released under the CC-BY-NC 4.0 license. See [LICENSE](LICENSE) for more details. 
 
 ## Acknowledgement
-This repository is based on the [DINO repository](https://github.com/facebookresearch/dino). 
+This repository is based on the [DINO repository](https://github.com/facebookresearch/dino). All modified DINO-related code has been consolidated within the ```dino``` directory, accompanied by the necessary licensing details and attributions.
 
 
 ## Citation

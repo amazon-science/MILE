@@ -11,6 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# Original Copyright 2021 Facebook, Inc. and its affiliates. Licensed under the Apache License, Version 2.0
+# Modifications Copyright 2024 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 """
 Misc functions.
 
@@ -403,6 +406,7 @@ def trunc_normal_(tensor, mean=0., std=1., a=-2., b=2.):
     # type: (Tensor, float, float, float, float) -> Tensor
     return _no_grad_trunc_normal_(tensor, mean, std, a, b)
 
+# 2024-11-22: Amazon addition.
 class MultiCropWrapper(nn.Module):
     """
     Perform forward pass separately on each resolution input.
@@ -441,7 +445,8 @@ class MultiCropWrapper(nn.Module):
         if self.head is not None:
             return self.head(output)
         return output
-    
+# End of Amazon addition.
+
 def get_params_groups(model):
     regularized = []
     not_regularized = []

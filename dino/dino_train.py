@@ -1,3 +1,19 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Original Copyright 2021 Facebook, Inc. and its affiliates. Licensed under the Apache License, Version 2.0
+# Modifications Copyright 2024 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 import math
 import sys
 
@@ -85,6 +101,7 @@ def train_one_epoch(student, teacher, teacher_without_ddp, dino_loss, data_loade
         metric_logger.update(loss=loss.item())
         metric_logger.update(lr=optimizer.param_groups[0]["lr"])
         metric_logger.update(wd=optimizer.param_groups[0]["weight_decay"])
+        # 2024-11-22: Amazon addition.
         if args.num_gpus > 1:
             if args.gate_tanh and args.view == "multi-view":
                 metric_logger.update(student_tanh=nn.Tanh()(student.module.gate_alpha))
@@ -102,7 +119,7 @@ def train_one_epoch(student, teacher, teacher_without_ddp, dino_loss, data_loade
             if args.dual_gate_tanh and args.view == "multi-view":
                 metric_logger.update(student_dual_tanh=nn.Tanh()(student.dual_gate_alpha))
                 metric_logger.update(teacher_dual_tanh=nn.Tanh()(teacher.dual_gate_alpha))
-
+        # End of Amazon addition.
     # gather the stats from all processes
     metric_logger.synchronize_between_processes()
     logger.info("Averaged stats:", metric_logger)

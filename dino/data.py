@@ -1,7 +1,23 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Original Copyright 2021 Facebook, Inc. and its affiliates. Licensed under the Apache License, Version 2.0
+# Modifications Copyright 2024 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 from dino import utils
 from torchvision import datasets, transforms
 from PIL import Image
-
+# 2024-11-22: Amazon addition.
 class DataAugmentationDINO(object):
     def __init__(self, global_crops_scale, local_crops_scale, local_crops_number, patch_size):
         if patch_size == 8 or patch_size == 16:
@@ -52,3 +68,4 @@ class DataAugmentationDINO(object):
         for _ in range(self.local_crops_number):
             crops.append(self.local_transfo(image))
         return crops
+# End of Amazon addition.
