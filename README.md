@@ -158,6 +158,9 @@ Our model achieves the following performance on :
 
 **ABO Object Retrieval Results.** Prefix *ft* denotes the fine-tuned version of the single-image model setup on ABO. We fine-tuned only to the best performing pretrained backbones. All approaches are self-supervised except EvaClip, which uses weak-supervision in the form of image and text pairs. Our approach achieves superior performance for the AR@10 metric, thus proving robustness to setups where the structure of the matched object suffers changes between query and gallery visual content.
 
+## Security
+
+See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
 
 ## License 
 This project is released under the CC-BY-NC 4.0 license. See [LICENSE](LICENSE) for more details. 
