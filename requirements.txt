@@ -114,7 +114,7 @@ traitlets @ file:///home/conda/feedstock_root/build_artifacts/traitlets_17135351
 transformers==4.41.2
 typing_extensions @ file:///home/conda/feedstock_root/build_artifacts/typing_extensions_1717802530399/work
 tzdata==2024.1
-urllib3==2.2.1
+urllib3==2.2.2
 wcwidth @ file:///home/conda/feedstock_root/build_artifacts/wcwidth_1704731205417/work
 wheel==0.43.0
 xxhash==3.4.1
