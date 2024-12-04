@@ -2,7 +2,7 @@
 _*George Leotescu***, *Alin-Ionut Popa***, Diana Grigore, Daniel Voinea, Pietro Perona_
 ** equal contribution
 
-This repository is the official implementation of [MILE](https://arxiv.org/abs/). 
+This repository is the official implementation of [MILE](https://www.amazon.science/publications/self-supervised-incremental-learning-of-object-representations-from-arbitrary-image-sets). 
 
 ![](figures/overview_v11.jpg)
 > This repository presents the implementation of a novel framework for generating holistic embeddings of visual concepts from multiple images using self-supervised learning (SSL). Key features include:
