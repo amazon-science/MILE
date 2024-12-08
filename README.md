@@ -1,16 +1,17 @@
 # Self-Supervised Incremental Learning of Object Representations from Arbitrary Image Sets - WACV 2025 - Official Repository 
-_*George Leotescu***, *Alin-Ionut Popa***, Diana Grigore, Daniel Voinea, Pietro Perona_
-** equal contribution
+_*George Leotescu**, *Alin-Ionut Popa**, Diana Grigore, Daniel Voinea, Pietro Perona_
 
-This repository is the official implementation of [MILE](https://www.amazon.science/publications/self-supervised-incremental-learning-of-object-representations-from-arbitrary-image-sets). 
+This is the official PyTorch implementation of [MILE](https://www.amazon.science/publications/self-supervised-incremental-learning-of-object-representations-from-arbitrary-image-sets). 
 
 ![](figures/overview_v11.jpg)
-> This repository presents the implementation of a novel framework for generating holistic embeddings of visual concepts from multiple images using self-supervised learning (SSL). Key features include:
->*  a structured multi-image embedding via sequential latent space modeling
->* an incremental object representation update mechanism
->* an SSL training framework adapted for multi-image inputs. 
->
->The approach introduces a new formulation of object retrieval based on image sets and overcomes geometrical constraints imposed by rigid objects in multi-image setups. Validated on the ABO and iNaturalist datasets, the framework outperforms competitive self and weakly supervised methods in object retrieval tasks. It utilizes ViT family backbones but is compatible with any image encoder. The multi-image approach accommodates various visual distributions of the same object without viewpoint consistency constraints, making it more flexible than traditional multi-view setups. This implementation aims to learn from a broader and more diverse training set, avoiding the limitations of contrastive learning approaches that require numerous images per object.
+
+This repository introduces an innovative framework for creating comprehensive visual concept embeddings from multiple images using self-supervised learning (SSL). Key features include:
+*  a structured multi-image embedding via sequential latent space modeling
+* an incremental object representation update mechanism
+* an SSL training framework adapted for multi-image inputs. 
+
+The approach introduces a new formulation of object retrieval based on image sets and overcomes geometrical constraints imposed by rigid objects in multi-image setups. Validated on the ABO and iNaturalist datasets, the framework outperforms competitive self and weakly supervised methods in object retrieval tasks. It utilizes ViT family backbones but is compatible with any image encoder. The multi-image approach accommodates various visual distributions of the same object without viewpoint consistency constraints, making it more flexible than traditional multi-view setups. This implementation aims to learn from a broader and more diverse training set, avoiding the limitations of contrastive learning approaches that require numerous images per object.
+
 
 ## Requirements
 
