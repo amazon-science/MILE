@@ -38,8 +38,6 @@ jsonschema-specifications==2023.12.1
 jupyter_client @ file:///home/conda/feedstock_root/build_artifacts/jupyter_client_1716472197302/work
 jupyter_core @ file:///home/conda/feedstock_root/build_artifacts/jupyter_core_1710257406420/work
 kiwisolver==1.4.5
-lightning==2.3.0
-lightning-utilities==0.11.2
 MarkupSafe==2.1.5
 matplotlib==3.7.3
 matplotlib-inline @ file:///home/conda/feedstock_root/build_artifacts/matplotlib-inline_1713250518406/work
@@ -83,7 +81,6 @@ pyarrow-hotfix==0.6
 Pygments @ file:///home/conda/feedstock_root/build_artifacts/pygments_1714846767233/work
 pyparsing==3.1.2
 python-dateutil==2.9.0.post0
-pytorch-lightning==2.3.0
 pytz==2024.1
 PyYAML==6.0.1
 pyzmq @ file:///home/conda/feedstock_root/build_artifacts/pyzmq_1715024373784/work
